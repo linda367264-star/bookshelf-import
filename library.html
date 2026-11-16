@@ -96,7 +96,7 @@
     return e;
   };
   const statusText = b => b.status === 'available' ? '可借閱'
-    : b.status === 'self_reading' ? '書主閱讀中'
+    : b.status === 'self_reading' ? (b.mine ? '閱讀中（你）' : '書主閱讀中')
     : `借閱中（${b.holder_is_me ? '你' : (b.holder || '?')}）`;
 
   let books = [], lineId = '', filter = 'all', query = '';
@@ -153,7 +153,7 @@
     for (const b of list) {
       const card = el('button', 'book');
       const cov = coverEl(b);
-      if (b.status !== 'available') cov.appendChild(el('span', 'badge', b.status === 'self_reading' ? '閱讀中' : '借出'));
+      if (b.status !== 'available') cov.appendChild(el('span', 'badge', b.status === 'self_reading' ? '閱讀中' : (b.mine ? '借出' : '借閱中')));
       if (b.mine) cov.appendChild(el('span', 'badge mine', '我的'));
       card.append(cov, el('div', 't', b.title), el('div', 'o', b.mine ? '我' : b.owner));
       card.onclick = () => openSheet(b);
