@@ -240,7 +240,7 @@
       const res = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: payload });
       const data = await res.json();
       if (data.ok) {
-        status.textContent = `✅ 完成！新增 ${data.added} 本，略過 ${data.skipped} 本重複的書`;
+        status.textContent = `✅ 完成！新增 ${data.added} 本` + (data.updated ? `，補上 ${data.updated} 本的封面與簡介` : '') + `，略過 ${data.skipped} 本已有的書`;
       } else {
         status.textContent = '❌ ' + (data.error || '匯入失敗');
         sendBtn.disabled = false;
