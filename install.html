@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>安裝「匯出讀墨書單」小工具</title>
+<style>
+  :root { --green:#06c755; --ink:#1f2328; --muted:#667085; --line:#e6e8eb; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,"Noto Sans TC","PingFang TC",sans-serif; color:var(--ink); background:#f7f8fa; line-height:1.7; }
+  main { max-width:640px; margin:0 auto; padding:40px 20px 60px; }
+  h1 { font-size:26px; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 28px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin-bottom:16px; }
+  ol { margin:0; padding-left:1.3em; }
+  ol li { margin:10px 0; }
+  .bm-wrap { text-align:center; padding:26px 0 8px; }
+  #bm { display:inline-block; background:var(--green); color:#fff; text-decoration:none; font-weight:600; font-size:17px; padding:12px 22px; border-radius:10px; cursor:grab; box-shadow:0 2px 8px rgba(6,199,85,.35); }
+  #bm.loading { background:#aaa; box-shadow:none; pointer-events:none; }
+  .hint { font-size:13px; color:var(--muted); margin-top:10px; }
+  .note { font-size:14px; color:var(--muted); }
+  code { background:#f0f2f4; padding:1px 6px; border-radius:5px; font-size:13px; }
+  .err { color:#c00; font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>📚 匯出讀墨書單</h1>
+  <p class="lead">把你讀墨書櫃裡的書，一次匯入共享書單。不用一本一本手打。</p>
+
+  <div class="card">
+    <strong>1. 把下面的按鈕拖到瀏覽器上方的書籤列（只需要做一次）</strong>
+    <div class="bm-wrap">
+      <a id="bm" class="loading" href="#">載入中…</a>
+      <div class="hint">看不到書籤列？按 <code>Ctrl+Shift+B</code>（Windows）或 <code>Cmd+Shift+B</code>（Mac）打開</div>
+      <div id="err" class="err"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <ol start="2">
+      <li><strong>登入讀墨網頁版，打開「書櫃」</strong><br>
+        <a href="https://next.readmoo.com/read/#/library" target="_blank" rel="noopener">next.readmoo.com/read</a>，等書籍載入完成。</li>
+      <li><strong>點一下書籤列上的「📚 匯出讀墨書單」</strong><br>
+        畫面會列出你所有的書。不想分享的書取消勾選即可。</li>
+      <li><strong>貼上匯入代碼，按「送出」</strong><br>
+        代碼請在 LINE 對機器人輸入「匯入」取得。也可以只按「下載 CSV」自己保存。</li>
+    </ol>
+  </div>
+
+  <div class="card note">
+    <strong>🔒 隱私說明</strong>
+    <ul>
+      <li>小工具只讀取讀墨網頁存在<strong>你自己電腦</strong>裡的書櫃資料，不會碰你的帳號密碼、Email 或購買紀錄。</li>
+      <li>按下「送出」之前，任何資料都不會離開你的電腦；送出的內容只有你勾選的書名、作者、ISBN 和封面。</li>
+      <li>向家人借來的書不會被列入。</li>
+      <li>程式碼完全公開：<a href="bookmarklet.js" target="_blank">查看原始碼</a></li>
+    </ul>
+    <p>目前只支援電腦版瀏覽器（Chrome、Edge、Safari、Firefox）。</p>
+  </div>
+</main>
+
+<script>
+  // ★ 部署前只需要改這一行：你的 Apps Script「網頁應用程式」網址（留空 = 只提供複製與下載 CSV）
+  const ENDPOINT = 'https://obbeopbugmphefasevia.supabase.co/functions/v1/readmoo-import';
+
+  (async () => {
+    const bm = document.getElementById('bm');
+    try {
+      const src = await (await fetch('bookmarklet.js', { cache: 'no-cache' })).text();
+      const code = src
+        .replace(/\/\*[\s\S]*?\*\//g, '')       // 去掉區塊註解
+        .split('\n').filter(l => !/^\s*\/\//.test(l)).join('\n') // 去掉整行註解
+        .replace('__ENDPOINT__', ENDPOINT);
+      bm.href = 'javascript:' + encodeURIComponent(code);
+      bm.textContent = '📚 匯出讀墨書單';
+      bm.classList.remove('loading');
+      bm.onclick = e => { e.preventDefault(); alert('請不要直接點，請把這個按鈕「拖」到書籤列上。'); };
+    } catch (e) {
+      document.getElementById('err').textContent = '載入失敗：請確認 install.html 與 bookmarklet.js 放在同一個網站資料夾，並透過網址開啟（不能直接雙擊本機檔案）。';
+    }
+  })();
+</script>
+</body>
+</html>
